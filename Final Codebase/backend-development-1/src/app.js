@@ -8,12 +8,37 @@ app.use(express.json());
 
 // To create a new note:
 app.post("/notes", (req, res) => {
-  notes.push(req.body);
-  res.status(201).json({ message: "Notes created successfully!" });
+  const { title, description } = req.body;
+
+  // Validation
+  if (!title || !description) {
+    return res.status(400).json({
+      message: "Title and description are required.",
+    });
+  }
+
+  // Create note
+  const note = {
+    title,
+    description,
+  };
+
+  notes.push(note);
+
+  res.status(201).json({
+    message: "Note created successfully!",
+    data: note,
+  });
 });
 
 // To view all notes:
 app.get("/notes", (req, res) => {
+  if (notes.length === 0) {
+    return res.status(404).json({
+      message: "No notes found.",
+    });
+  }
+
   res.status(200).json({
     message: "Notes fetched successfully!",
     count: notes.length,
@@ -37,10 +62,32 @@ app.delete("/notes/:id", (req, res) => {
     message: "Note deleted successfully!",
     data: notes,
   });
+});
 
-  console.log(notes);
-  console.log(notes.length);
-  console.log(id);
+// To Update a Note:
+app.patch("/notes/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  if (id >= notes.length || id < 0) {
+    return res.status(404).json({
+      message: "Note not found.",
+    });
+  }
+
+  const { title, description } = req.body;
+
+  if (title) {
+    notes[id].title = title;
+  }
+
+  if (description) {
+    notes[id].description = description;
+  }
+
+  res.status(200).json({
+    message: "Note updated successfully!",
+    data: notes[id],
+  });
 });
 
 module.exports = app;
