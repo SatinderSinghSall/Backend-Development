@@ -23,6 +23,47 @@ app.get("/notes", async (req, res) => {
   }
 });
 
+// Route: Create a new Note:
+app.post("/notes", async (req, res) => {
+  try {
+    const { title, description } = req.body;
+
+    // Validations:
+    if (!title || !description) {
+      return res.status(400).json({
+        message: "Title and description are required",
+      });
+    }
+
+    if (title.length < 3) {
+      return res.status(400).json({
+        message: "Title must be at least 3 characters long",
+      });
+    }
+
+    if (description.length < 5) {
+      return res.status(400).json({
+        message: "Description must be at least 5 characters long",
+      });
+    }
+
+    const createdNote = await noteModel.create({
+      title,
+      description,
+    });
+
+    res.status(201).json({
+      message: "Note created successfully!",
+      note: createdNote,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to create note",
+      error: error.message,
+    });
+  }
+});
+
 // Route: Get a single Note:
 app.get("/notes/:id", async (req, res) => {
   try {
